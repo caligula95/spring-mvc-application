@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Books</title>
+    <link rel="stylesheet" href="styles/style.css">
+</head>
+<body>
+<div th:insert="~{parts/navigation::navigation}"></div>
+<h1>Welcome to the book page <span th:text="${userLogin}"></span></h1>
+<table>
+    <tr>
+        <th>Title</th>
+        <th>Year</th>
+        <th></th>
+        <th></th>
+    </tr>
+    <th:block th:each="book : ${userBooks}">
+        <tr>
+            <td th:text="${book.title}"></td>
+            <td th:text="${book.year}"></td>
+            <td><button><a th:href="@{|/books/edit/${book.title}|}">Edit</a></button></td>
+            <td><button><a th:href="@{|/books/delete/${book.title}|}">Delete</a></button></td>
+        </tr>
+    </th:block>
+
+</table>
+<a href="/books/create">Add new book</a>
+<div th:insert="~{parts/footer :: footer}"></div>
+</body>
+</html>

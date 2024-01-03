@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="post" action="/books/createBook" th:object="${newBook}">
+  <input type="text" name="title", placeholder="Title">
+  <input type="number" name="year", placeholder="Year">
+  <input type="submit" value="Save">
+</form>
+</body>
+</html>
