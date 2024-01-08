@@ -5,6 +5,9 @@ import com.springmvcapp.service.BookService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,21 +28,14 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping
-    public String getBookPage(@RequestParam(required = false, name = "login") String login,
-                              @RequestParam(required = false) String email,
-                              Model model,
-                              HttpServletRequest request) {
+    public String getBookPage(Model model,
+                              @AuthenticationPrincipal UserDetails userDetails) {
 
-        HttpSession session = request.getSession();
-        if (login != null && !login.isEmpty()) {
-            session.setAttribute(USER_LOGIN, login);
-        }
+        String username = userDetails.getUsername();
 
-        String userLogin = (String) session.getAttribute(USER_LOGIN);
+        model.addAttribute(USER_LOGIN, username);
 
-        model.addAttribute(USER_LOGIN, userLogin);
-
-        List<BookModel> books = bookService.getAllBooksByLogin(userLogin);
+        List<BookModel> books = bookService.getAllBooksByLogin(username);
 
         model.addAttribute("userBooks", books);
         return "book_page";
@@ -71,6 +67,7 @@ public class BookController {
     }
 
     @GetMapping("/delete/{title}")
+    @PreAuthorize("hasRole('ADMIN')")
     public String delete(@PathVariable String title) {
         bookService.delete(title);
         return "redirect:/books";
