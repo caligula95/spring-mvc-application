@@ -1,5 +1,8 @@
 package com.springmvcapp.service;
 
+import com.springmvcapp.config.jwt.JwtProvider;
+import com.springmvcapp.controller.request.UserTokenRequest;
+import com.springmvcapp.exception.AuthException;
 import com.springmvcapp.model.UserModel;
 import com.springmvcapp.model.UserRole;
 import jakarta.annotation.PostConstruct;
@@ -9,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -17,6 +21,7 @@ public class UserService {
     private static List<UserModel> users = new ArrayList<>();
 
     private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
 
     @PostConstruct
     public void postConstruct() {
@@ -34,8 +39,17 @@ public class UserService {
     }
 
     public UserModel findByLogin(String login) {
-        return users.stream().filter(user -> user.getUsername().equals(login))
+        return users.stream()
+                .filter(user -> user.getUsername().equals(login))
                 .findFirst()
                 .orElse(null);
+    }
+
+    public String generateToken(UserTokenRequest request) {
+        var userModel = Optional.ofNullable(findByLogin(request.getLogin()))
+                .filter(user -> passwordEncoder.matches(request.getPassword(), user.getPassword()))
+                .orElseThrow(AuthException::new);
+
+        return jwtProvider.generateToken(userModel.getUsername());
     }
 }
